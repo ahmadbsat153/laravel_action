@@ -169,7 +169,7 @@ export default function Footer() {
                                             href={"/palletterms"}
                                             className="text-sm leading-6 text-goldl hover:text-white"
                                         >
-                                            TEST BY AHMad
+                                            GTLS Pallets T&C
                                         </a>
                                     </div>
                                 </div>
