@@ -6,14 +6,9 @@ import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
-import PasswordInput from "@/Components/PasswordInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { PublicClientApplication } from "@azure/msal-browser";
-import ReCAPTCHA from "react-google-recaptcha";
 import { InertiaApp } from "@inertiajs/inertia-react";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import "../../../css/scroll.css";
-import axios from "axios";
 const msalConfig = {
     auth: {
         clientId: "05f70999-6ca7-4ee8-ac70-f2d136c50288",
@@ -30,31 +25,49 @@ const pca = new PublicClientApplication(msalConfig);
 export default function Login({ status, canResetPassword }) {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
-    const [recaptchaValue, setRecaptchaValue] = useState(false);
-    const [passwordType, setPasswordType] = useState("password");
-    const togglePassword = () => {
-        if (passwordType === "password") {
-            setPasswordType("text");
-            return;
-        }
-        setPasswordType("password");
-    };
-
-    const handleRecaptchaChange = (value) => {
-        setRecaptchaValue(true);
-    };
-
-    const handleRecaptchaExpired = () => {
-        setRecaptchaValue(false);
-    };
 
     const handleNextClick = async (e) => {
-        // e.preventDefault();
-        setShowPassword(true);
-    };
-    const handleBackClick = async (e) => {
-        // e.preventDefault();
-        setShowPassword(false);
+        e.preventDefault();
+
+        if (email.endsWith("@gtls.com.au")) {
+            // try {
+            //     // Step 1: Authenticate the user using Microsoft login popup
+            //     const loginResponse = await pca.loginPopup({ scopes });
+            //     pca.setActiveAccount(loginResponse.account);
+
+            //     // Step 2: Get the access token silently
+            //     const tokenResponse = await pca.acquireTokenSilent({ scopes });
+            //     console.log("Token Acquired");
+            //     console.log(tokenResponse);
+
+            //     // Step 3: Send the access token to your Laravel backend
+            //     const headers = {
+            //         Authorization: `Bearer ${tokenResponse.accessToken}`,
+            //     };
+            //     const response = await fetch("/api/user", {
+            //         method: "GET",
+            //         headers: {
+            //             Authorization: `Bearer ${tokenResponse.accessToken}`,
+            //         },
+            //     });
+            //     const response2 = await fetch("/checkAuth");
+            //     console.log("Second response", response2);
+            //     // Step 4: Check if the user is authenticated in Laravel
+            //     // if (response.status === 401) {
+            //     //     // User is not authenticated, redirect to login page
+            //     //     window.location.href = "/";
+            //     // } else {
+            //     //     // User is authenticated, redirect to dashboard page
+            //     //     console.log('Going to MAIN');
+            //     //     window.location.href = "/Main";
+            //     // }
+            // } catch (error) {
+            //     console.log(" !! Error !!");
+            //     console.log(error);
+            // }
+        } else {
+            setShowPassword(true);
+        }
     };
     useEffect(() => {
         pca.handleRedirectPromise().then(() => {
@@ -88,118 +101,73 @@ export default function Login({ status, canResetPassword }) {
 
         post(route("login"));
     };
-    const handleKeyPress = (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault(); // Prevent the default form submission behavior
-            handleNextClick();
-        }
-    };
 
     return (
         <div className="bg-black">
             <GuestLayout>
                 <Head title="Sign in" />
-                <div className="flex  flex-col justify-center items-center ">
+                <div className="flex flex-col justify-center items-center">
                     <div className=" w-full shadow-md rounded px-8 pt-6 pb-8 mb-4 relative">
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="mt-1">
-                                <a
-                                    href="/"
-                                    className="text-white hover:text-goldd flex items-center"
-                                >
-                                    <svg
-                                        viewBox="0 0 64 64"
-                                        fill="currentColor"
-                                        height="1.3em"
-                                        width="1.3em"
-                                    >
-                                        <path
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeLinejoin="bevel"
-                                            strokeMiterlimit={10}
-                                            strokeWidth={2}
-                                            d="M32.936 48.936l-17-17 17-17"
-                                        />
-                                        <path
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeLinejoin="bevel"
-                                            strokeMiterlimit={10}
-                                            strokeWidth={2}
-                                            d="M47.936 48.936l-17-17 17-17"
-                                        />
-                                    </svg>{" "}
-                                    Back to home
-                                </a>
-                            </div>
+                        <form onSubmit={submit} className="space-y-6">
                             <div className="relative">
                                 <InputLabel
                                     htmlFor="email"
                                     value="Email"
-                                    className={`  top-0 left-0  duration-500 text-sm font-medium text-white`}
+                                    className={`${
+                                        showPassword
+                                            ? "opacity-0 -translate-x-full"
+                                            : "opacity-100"
+                                    }  top-0 left-0 transition-all duration-500 text-sm font-medium text-white`}
                                 >
                                     Email
                                 </InputLabel>
+                                <a className="text-white" href="/auth/azure">
+                                    Login with Microsoft Azure
+                                </a>
+                                <InputLabel
+                                    htmlFor="password"
+                                    value="Password"
+                                    className={`${
+                                        showPassword
+                                            ? "opacity-100"
+                                            : "opacity-0 translate-x-full"
+                                    } absolute top-0 left-0 transition-all duration-500 text-sm font-medium text-white`}
+                                >
+                                    Password
+                                </InputLabel>
 
-                                <div className=" ">
+                                <div className=" relative">
                                     <TextInput
                                         id="email"
                                         type="email"
                                         name="email"
                                         value={data.email}
-                                        onKeyDown={handleKeyPress}
                                         autoComplete="username"
                                         isFocused={true}
                                         onChange={handleOnChange}
-                                        className={`  appearance-none mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline transition-all duration-500`}
+                                        className={`${
+                                            showPassword
+                                                ? "opacity-0 -translate-x-full"
+                                                : "opacity-100"
+                                        } absolute appearance-none mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline transition-all duration-500`}
                                         placeholder="Email"
                                     />
-
-                                    <div className="relative">
-                                        <InputLabel
-                                            htmlFor="password"
-                                            value="Password"
-                                            className={`   duration-500 text-sm font-medium text-white`}
-                                        ></InputLabel>
-                                        <input
-                                            type={passwordType}
-                                            id="password"
-                                            name="password"
-                                            placeholder="Password"
-                                            value={data.password}
-                                            autoComplete="current-password"
-                                            onChange={handleOnChange}
-                                            className={`appearance-none w-full border mb-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline transition-all duration-500`}
-                                        />
-                                        <div
-                                            className="absolute inset-y-0 right-0 top-3 flex items-center pr-3 cursor-pointer"
-                                            onClick={togglePassword}
-                                        >
-                                            {passwordType === "password" ? (
-                                                <EyeSlashIcon
-                                                    className={` w-4 h-4`}
-                                                />
-                                            ) : (
-                                                <EyeIcon
-                                                    className={` w-4 h-4`}
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-end mt-0">
-                                        {canResetPassword && (
-                                            <Link
-                                                href={route("password.request")}
-                                                className="underline text-sm text-goldd dark:text-smooth hover:text-gray-900 dark:hover:text-goldd rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
-                                            >
-                                                Forgot your password?
-                                            </Link>
-                                        )}
-                                    </div>
                                     <InputError
                                         message={errors.email}
                                         className="mt-2"
+                                    />
+                                    <TextInput
+                                        id="password"
+                                        type="password"
+                                        name="password"
+                                        value={data.password}
+                                        autoComplete="current-password"
+                                        onChange={handleOnChange}
+                                        className={`${
+                                            showPassword
+                                                ? "opacity-100"
+                                                : "opacity-0 translate-x-full"
+                                        } appearance-none w-full border mb-2 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline transition-all duration-500`}
                                     />
                                     <InputError
                                         message={errors.password}
@@ -209,31 +177,93 @@ export default function Login({ status, canResetPassword }) {
                             </div>
                             <div className="flex items-center justify-between">
                                 <button
-                                    className={`flex w-full justify-center ${
-                                        processing || !recaptchaValue
-                                            ? "bg-gray-600 cursor-not-allowed text-white"
-                                            : "bg-goldd hover:bg-goldt text-dark"
-                                    } font-bold rounded-md border border-transparent bg-goldd py-2 px-4 text-sm font-medium  shadow-sm  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
-                                    disabled={processing || !recaptchaValue}
+                                    className={`${
+                                        showPassword ? "hidden" : "block"
+                                    } flex w-full justify-center rounded-md border border-transparent bg-yellow-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
+                                    type="button"
+                                    onClick={handleNextClick}
+                                >
+                                    Next
+                                </button>
+                                <PrimaryButton
+                                    disabled={processing}
+                                    className={`${
+                                        showPassword ? "block" : "hidden"
+                                    } flex w-full justify-center rounded-md border border-transparent bg-yellow-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2`}
                                     type="submit"
                                 >
                                     Sign In
-                                </button>
+                                </PrimaryButton>
                             </div>
                         </form>
-                        <ReCAPTCHA
-                            sitekey="6Lf30MEmAAAAAA4_iPf9gTM1VMNO9iSFKyaAC1P0"
-                            onChange={handleRecaptchaChange}
-                            onExpired={handleRecaptchaExpired}
-                            className="mt-4 flex justify-center "
-                            size="normal" // Set the desired size here: "compact", "normal", or "invisible"
-                            render="explicit" // Use "explicit" rendering
-                            theme="dark" // Set the desired theme: "light" or "dark"
-                            style={{ transform: "scale(0.8)" }} // Use CSS transform to adjust the size
-                        />
                     </div>
                 </div>
-               
+                {/* <form onSubmit={submit} className="space-y-6">
+                    <div>
+                        <InputLabel
+                            htmlFor="email"
+                            value="Email"
+                            className="block text-sm font-medium text-white"
+                        />
+
+                        <TextInput
+                            id="email"
+                            type="email"
+                            name="email"
+                            value={data.email}
+                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                            autoComplete="username"
+                            isFocused={true}
+                            onChange={handleOnChange}
+                        />
+
+                        <InputError message={errors.email} className="mt-2" />
+                    </div>
+
+                    <div className="mt-4">
+                        <InputLabel
+                            htmlFor="password"
+                            value="Password"
+                            className="block text-sm font-medium text-white"
+                        />
+
+                        <TextInput
+                            id="password"
+                            type="password"
+                            name="password"
+                            value={data.password}
+                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                            autoComplete="current-password"
+                            onChange={handleOnChange}
+                        />
+
+                        <InputError
+                            message={errors.password}
+                            className="mt-2"
+                        />
+                        {canResetPassword && (
+                            <Link
+                                href={route("password.request")}
+                                className="mt-4 font-medium text-yellow-600 hover:text-yellow-500 "
+                            >
+                                Forgot your password ? 
+                            </Link>
+                        )}
+                    </div>
+
+                    
+
+                    <div className="flex flex-col items-center justify-between">
+                        
+
+                        <PrimaryButton
+                            className=" flex w-full justify-center rounded-md border border-transparent bg-yellow-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            disabled={processing}
+                        >
+                            SIGN IN
+                        </PrimaryButton>
+                    </div>
+                </form> */}
             </GuestLayout>
         </div>
     );
